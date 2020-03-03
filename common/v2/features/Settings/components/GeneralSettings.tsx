@@ -102,6 +102,13 @@ export default class GeneralSettings extends React.Component<SettingsProps> {
     }
   };
 
+  public changeIn3 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement;
+    const settings = this.props.globalSettings;
+    settings.useIn3 = target.checked ? true : false;
+    this.props.updateGlobalSettings(settings);
+  };
+
   public render() {
     const { globalSettings } = this.props;
     return (
@@ -130,6 +137,12 @@ export default class GeneralSettings extends React.Component<SettingsProps> {
           <SettingsControl>
             <SettingsButton secondary={true}>{translate('SETTINGS_DOWNLOAD_LABEL')}</SettingsButton>
             <SettingsButton secondary={true}>{translate('SETTINGS_PRINT_LABEL')}</SettingsButton>
+          </SettingsControl>
+        </SettingsField>
+        <SettingsField>
+          <SettingsLabel>{translate('SETTINGS_USE_IN3_LABEL')}</SettingsLabel>
+          <SettingsControl>
+            <input type="checkbox" onChange={this.changeIn3} checked={globalSettings.useIn3} />
           </SettingsControl>
         </SettingsField>
         <SettingsField>
