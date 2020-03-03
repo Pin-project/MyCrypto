@@ -7,6 +7,7 @@ export interface ISettings {
   dashboardAccounts: TUuid[];
   inactivityTimer: number;
   node?: string;
+  useIn3?: boolean;
   rates: IRates;
   language: string; // Todo: Change to enum
 }

@@ -229,6 +229,7 @@
     "SETTINGS_IMPORT_PASTE": "or drop your MyCrypto Settings file here.",
     "SETTINGS_IMPORT_SUCCESS": "You will see the imported files in settings!",
     "SETTINGS_IMPORT_COMPLETE": "Back To Settings",
+    "SETTINGS_USE_IN3_LABEL": "Enable Incentivized Verification",
     "HOME_WALLETS_HEADER": "Fully Compatible",
     "HOME_WALLETS_DESCRIPTION": "Use with your favorite hardware and software wallets:",
     "HOME_PEACE_OF_MIND_HEADER": "Finally Enjoy Peace of Mind",
