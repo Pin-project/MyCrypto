@@ -6,7 +6,8 @@ export enum NodeType {
   ETHERSCAN = 'etherscan',
   INFURA = 'infura',
   WEB3 = 'web3',
-  MYC_CUSTOM = 'myccustom'
+  MYC_CUSTOM = 'myccustom',
+  IN3 = 'in3'
 }
 
 export interface NodeConfig {
