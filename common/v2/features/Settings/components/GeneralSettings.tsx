@@ -6,9 +6,11 @@ import styled from 'styled-components';
 import { COLORS, SPACING, BREAK_POINTS, FONT_SIZE } from 'v2/theme';
 import translate from 'v2/translations';
 import { AnalyticsService, ANALYTICS_CATEGORIES } from 'v2/services';
-import { ISettings } from 'v2/types';
+import { Network, NetworkId, NodeType, NodeOptions, ISettings } from 'v2/types';
 import { DashboardPanel } from 'v2/components';
 import { ROUTE_PATHS } from 'v2/config';
+
+const IN3_SUPPORTED_NETWORKS = ['Ethereum', 'Kovan', 'Goerli'];
 
 const Divider = styled.div`
   height: 2px;
@@ -72,6 +74,13 @@ interface SettingsProps {
   updateGlobalSettings(settings: ISettings): void;
 }
 
+interface In3SwitchProps {
+  networks: Network[];
+  removeNodeTypeFromNetwork(nodeType: NodeType, network: Network): void;
+  addNodeToNetwork(node: NodeOptions, network: Network): void;
+  createIn3Node(networkId: NetworkId): NodeOptions;
+}
+
 const timerOptions = [
   { name: '1 Minutes', value: '60000' },
   { name: '3 Minutes', value: '180000' },
@@ -86,7 +95,7 @@ const timerOptions = [
   { name: '12 Hours', value: '43200000' }
 ];
 
-export default class GeneralSettings extends React.Component<SettingsProps> {
+export default class GeneralSettings extends React.Component<SettingsProps & In3SwitchProps> {
   public changeTimer = (event: React.FormEvent<HTMLSelectElement>) => {
     const target = event.target as HTMLSelectElement;
     const settings = this.props.globalSettings;
@@ -107,6 +116,17 @@ export default class GeneralSettings extends React.Component<SettingsProps> {
     const settings = this.props.globalSettings;
     settings.useIn3 = target.checked ? true : false;
     this.props.updateGlobalSettings(settings);
+
+    //if not checked remove in3 network nodes else add In3 nodes
+    for (const network of this.props.networks) {
+      if (IN3_SUPPORTED_NETWORKS.includes(network.id)) {
+        if (!target.checked) {
+          this.props.removeNodeTypeFromNetwork(NodeType.IN3, network);
+        } else {
+          this.props.addNodeToNetwork(this.props.createIn3Node(network.id), network);
+        }
+      }
+    }
   };
 
   public render() {
