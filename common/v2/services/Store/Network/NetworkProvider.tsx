@@ -9,7 +9,9 @@ export interface INetworkContext {
   getNetworkByName(name: string): Network | undefined;
   getNetworkByChainId(chainId: number): Network | undefined;
   addNodeToNetwork(node: NodeOptions, network: Network): void;
+  removeNodeTypeFromNetwork(nodeType: NodeType, network: Network): void;
   createWeb3Node(networkId: NetworkId): NodeOptions;
+  createIn3Node(networkId: NetworkId): NodeOptions;
 }
 
 export const NetworkContext = createContext({} as INetworkContext);
@@ -34,6 +36,14 @@ export const NetworkProvider: React.FC = ({ children }) => {
       };
       state.updateNetwork(network.id, n);
     },
+    removeNodeTypeFromNetwork: (nodeType: NodeType, network: Network) => {
+      const filteredNodes = network.nodes.filter(n => !(n.type === nodeType));
+      const updatedNetwork = {
+        ...network,
+        nodes: filteredNodes
+      };
+      state.updateNetwork(network.id, updatedNetwork);
+    },
     createWeb3Node: (networkId: NetworkId): NodeOptions => ({
       name: 'web3',
       isCustom: false,
@@ -42,6 +52,15 @@ export const NetworkProvider: React.FC = ({ children }) => {
       service: 'MetaMask / Web3',
       hidden: true,
       network: `WEB3_${networkId}`
+    }),
+    createIn3Node: (networkId: NetworkId): NodeOptions => ({
+      name: 'in3',
+      isCustom: false,
+      type: NodeType.IN3,
+      url: '',
+      service: 'In3',
+      hidden: true,
+      network: `IN3_${networkId}`
     })
   };
 
