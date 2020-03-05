@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { FallbackProvider, BaseProvider } from 'ethers/providers';
-
+import { in3Spawn, defaultIn3Config } from 'eth-json-rpc-in3';
 import { Network, NetworkId, NodeType, DPathFormat } from 'v2/types';
 
 // Network names accepted by ethers.EtherscanProvider
@@ -20,6 +20,24 @@ export const createNetworkProviders = (network: Network): FallbackProvider => {
       case NodeType.WEB3: {
         const ethereumProvider = window.ethereum;
         const networkName = getValidEthscanNetworkId(id);
+        return new ethers.providers.Web3Provider(ethereumProvider, networkName);
+      }
+      case NodeType.IN3: {
+        //if setting switch is turned on and netowrk is supported return provider
+        const networkName = getValidEthscanNetworkId(id);
+        const chainName = networkName === 'homestead' ? 'mainnet' : networkName;
+
+        //
+        //Reference for default config of In3
+        //  const defaultIn3Config = {
+        //    signatureCount: 2,
+        //    maxAttempts: 5,
+        //    proof: 'standard',
+        //    keepIn3: false,
+        //    replaceLatestBlock: 10
+        //};
+        const ethereumProvider = in3Spawn({ chainId: chainName, ...defaultIn3Config });
+
         return new ethers.providers.Web3Provider(ethereumProvider, networkName);
       }
 
