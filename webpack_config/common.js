@@ -22,6 +22,10 @@ module.exports = {
     globalObject: 'self'
   },
 
+  node: {
+    fs: 'empty'
+  },
+
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.css', '.json', '.scss'],
     modules: [
