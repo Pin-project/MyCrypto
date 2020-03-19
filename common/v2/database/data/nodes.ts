@@ -24,6 +24,12 @@ export const NODES_CONFIG: { [key in NetworkId]: NodeConfig[] } = {
       type: NodeType.INFURA,
       service: 'Infura',
       url: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`
+    },
+    {
+      name: makeNodeName('ETH', 'in3'),
+      type: NodeType.IN3,
+      service: 'Incubed',
+      url: ''
     }
   ],
 
@@ -42,6 +48,12 @@ export const NODES_CONFIG: { [key in NetworkId]: NodeConfig[] } = {
       type: NodeType.ETHERSCAN,
       service: 'Etherscan',
       url: 'https://kovan.etherscan.io/api'
+    },
+    {
+      name: makeNodeName('ETH', 'in3'),
+      type: NodeType.IN3,
+      service: 'Incubed',
+      url: ''
     }
   ],
 
@@ -72,6 +84,12 @@ export const NODES_CONFIG: { [key in NetworkId]: NodeConfig[] } = {
       type: NodeType.ETHERSCAN,
       service: 'Etherscan',
       url: 'https://api-goerli.etherscan.io/api'
+    },
+    {
+      name: makeNodeName('ETH', 'in3'),
+      type: NodeType.IN3,
+      service: 'Incubed',
+      url: ''
     }
   ],
 
