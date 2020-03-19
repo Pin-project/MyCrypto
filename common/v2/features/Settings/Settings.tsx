@@ -5,12 +5,7 @@ import translate from 'v2/translations';
 
 import { IS_MOBILE } from 'v2/utils';
 import { BREAK_POINTS, MIN_CONTENT_PADDING } from 'v2/theme';
-import {
-  AddressBookContext,
-  SettingsContext,
-  StoreContext,
-  NetworkContext
-} from 'v2/services/Store';
+import { AddressBookContext, SettingsContext, StoreContext } from 'v2/services/Store';
 import { AccountList, FlippablePanel, TabsNav } from 'v2/components';
 import { AddressBookPanel, AddToAddressBook, GeneralSettings, DangerZone } from './components';
 
@@ -84,21 +79,10 @@ function renderAddressPanel() {
 }
 
 function renderGeneralSettingsPanel() {
-  const { networks, removeNodeTypeFromNetwork, addNodeToNetwork, createIn3Node } = useContext(
-    NetworkContext
-  );
   const { updateSettings, settings } = useContext(SettingsContext);
-
   return (
     <>
-      <GeneralSettings
-        updateGlobalSettings={updateSettings}
-        globalSettings={settings}
-        networks={networks}
-        removeNodeTypeFromNetwork={removeNodeTypeFromNetwork}
-        addNodeToNetwork={addNodeToNetwork}
-        createIn3Node={createIn3Node}
-      />
+      <GeneralSettings updateGlobalSettings={updateSettings} globalSettings={settings} />
       <DangerZone />
     </>
   );
