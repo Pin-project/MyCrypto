@@ -6,26 +6,20 @@ import translate from 'v2/translations';
 import { NetworkContext, isWalletFormatSupportedOnNetwork } from 'v2/services/Store';
 import { NetworkId, WalletId } from 'v2/types';
 import { DEFAULT_NETWORK } from 'v2/config';
-import { Typography, Dropdown } from 'v2/components';
+import { Typography, Dropdown, Tooltip } from 'v2/components';
 
 interface Props {
   network: string | undefined;
   accountType?: WalletId;
+  className?: string;
+  showTooltip?: boolean;
   onChange(network: NetworkId): void;
 }
-
-const DropdownContainer = styled('div')`
-  .is-open > .Select-control > .Select-multi-value-wrapper > .Select-input:only-child {
-    transform: translateY(0%);
-    padding: 16px 15px 16px 15px;
-    position: inherit;
-  }
-`;
 
 const SContainer = styled('div')`
   display: flex;
   flex-direction: row;
-  padding: 16px 15px 16px 15px;
+  padding: 12px;
 
   &:hover {
     background-color: var(--color-gray-lighter);
@@ -43,7 +37,13 @@ class NetworkOption extends React.PureComponent<OptionComponentProps> {
   }
 }
 
-function NetworkSelectDropdown({ network, accountType, onChange }: Props) {
+function NetworkSelectDropdown({
+  network,
+  accountType,
+  onChange,
+  showTooltip = false,
+  ...props
+}: Props) {
   const { networks } = useContext(NetworkContext);
 
   // set default network if none selected
@@ -61,19 +61,20 @@ function NetworkSelectDropdown({ network, accountType, onChange }: Props) {
     .map(n => ({ label: n.name, value: n }));
 
   return (
-    <div>
-      <label>{translate('SELECT_NETWORK_LABEL')}</label>
-      <DropdownContainer>
-        <Dropdown
-          value={{ label: network }}
-          options={validNetworks.sort()}
-          placeholder={DEFAULT_NETWORK}
-          searchable={true}
-          onChange={option => onChange(option.value.id)}
-          optionComponent={NetworkOption}
-          valueComponent={({ value: option }) => <NetworkOption option={option} />}
-        />
-      </DropdownContainer>
+    <div {...props}>
+      <label>
+        {translate('SELECT_NETWORK_LABEL')}{' '}
+        {showTooltip && <Tooltip tooltip={translate('NETWORK_TOOLTIP')} />}
+      </label>
+      <Dropdown
+        value={{ label: network }}
+        options={validNetworks.sort()}
+        placeholder={DEFAULT_NETWORK}
+        searchable={true}
+        onChange={option => onChange(option.value.id)}
+        optionComponent={NetworkOption}
+        valueComponent={({ value: option }) => <NetworkOption option={option} />}
+      />
     </div>
   );
 }

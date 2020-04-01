@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Tooltip, Icon } from '@mycrypto/ui';
+import { Button, Icon } from '@mycrypto/ui';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -7,7 +7,7 @@ import { COLORS, SPACING, BREAK_POINTS, FONT_SIZE } from 'v2/theme';
 import translate from 'v2/translations';
 import { AnalyticsService, ANALYTICS_CATEGORIES } from 'v2/services';
 import { Network, NetworkId, NodeType, NodeOptions, ISettings } from 'v2/types';
-import { DashboardPanel } from 'v2/components';
+import { DashboardPanel, Tooltip } from 'v2/components';
 import { ROUTE_PATHS } from 'v2/config';
 
 const IN3_SUPPORTED_NETWORKS = ['Ethereum', 'Kovan', 'Goerli'];
@@ -58,7 +58,7 @@ const SettingsTooltipIcon = styled(Icon)`
 `;
 
 const SelectContainer = styled.div`
-  border: 0.125em solid #007896;
+  border: 0.125em solid ${COLORS.BLUE_LIGHT};
   padding: 0.6rem;
   width: 205px;
   text-align: center;
@@ -152,13 +152,14 @@ export default class GeneralSettings extends React.Component<SettingsProps & In3
             </Link>
           </SettingsControl>
         </SettingsField>
+        {/* Hidding Paper wallet section according to CH4412
         <SettingsField>
           <SettingsLabel>{translate('SETTINGS_PAPER_LABEL')}</SettingsLabel>
           <SettingsControl>
             <SettingsButton secondary={true}>{translate('SETTINGS_DOWNLOAD_LABEL')}</SettingsButton>
             <SettingsButton secondary={true}>{translate('SETTINGS_PRINT_LABEL')}</SettingsButton>
           </SettingsControl>
-        </SettingsField>
+        </SettingsField> */}
         <SettingsField>
           <SettingsLabel>{translate('SETTINGS_USE_IN3_LABEL')}</SettingsLabel>
           <SettingsControl>

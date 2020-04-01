@@ -24,7 +24,10 @@ import {
   SignAndVerifyMessage,
   BroadcastTransactionFlow,
   InteractWithContractsFlow,
-  DeployContractsFlow
+  DeployContractsFlow,
+  DeFiZapFlow,
+  PurchaseMembershipStepper,
+  MembershipEducation
 } from 'v2/features';
 import { requiresDesktopApp } from './helpers';
 
@@ -172,6 +175,7 @@ export const STATIC_APP_ROUTES: IAppRoute[] = [
     title: ROUTE_PATHS.SWAP.title,
     path: ROUTE_PATHS.SWAP.path,
     enabled: IS_ACTIVE_FEATURE.SWAP,
+    requireAccounts: true,
     exact: true,
     component: SwapAssetsFlow
   },
@@ -211,6 +215,33 @@ export const STATIC_APP_ROUTES: IAppRoute[] = [
     path: ROUTE_PATHS.DEPLOY_CONTRACTS.path,
     enabled: IS_ACTIVE_FEATURE.CONTRACT_DEPLOY,
     component: DeployContractsFlow
+  },
+  {
+    name: ROUTE_PATHS.DEFIZAP.name,
+    title: ROUTE_PATHS.DEFIZAP.title,
+    path: `${ROUTE_PATHS.DEFIZAP.path}/:zapName?`,
+    exact: true,
+    requireAccounts: true,
+    enabled: IS_ACTIVE_FEATURE.DEFIZAP,
+    component: DeFiZapFlow
+  },
+  {
+    name: ROUTE_PATHS.MYC_MEMBERSHIP.name,
+    title: ROUTE_PATHS.MYC_MEMBERSHIP.title,
+    path: ROUTE_PATHS.MYC_MEMBERSHIP.path,
+    exact: true,
+    requireAccounts: false,
+    enabled: IS_ACTIVE_FEATURE.MYC_MEMBERSHIP,
+    component: MembershipEducation
+  },
+  {
+    name: ROUTE_PATHS.MYC_MEMBERSHIP.name,
+    title: ROUTE_PATHS.MYC_MEMBERSHIP.title,
+    path: `${ROUTE_PATHS.MYC_MEMBERSHIP.path}/buy`,
+    exact: true,
+    requireAccounts: false,
+    enabled: IS_ACTIVE_FEATURE.MYC_MEMBERSHIP,
+    component: PurchaseMembershipStepper
   }
 ];
 

@@ -5,18 +5,18 @@ import {
   LedgerNanoSDecrypt,
   KeystoreDecrypt,
   MnemonicDecrypt,
-  ParitySignerDecrypt,
   PrivateKeyDecrypt,
-  SafeTminiDecrypt,
   TrezorDecrypt,
   Web3ProviderDecrypt,
   Web3ProviderInstall,
-  ViewOnlyDecrypt
+  ViewOnlyDecrypt,
+  WalletConnectDecrypt
 } from 'v2/components';
+import { withWalletConnect } from 'v2/services/WalletService';
 
 import { NetworkSelectPanel } from './components';
 
-// This const is used to hideFromWalletList
+// This const is used to disable non supported wallets
 // only if it is not the Desktop App and not the Dev environment
 export const IS_NOT_ELECTRON_AND_IS_NOT_DEV: boolean = !IS_ELECTRON && !IS_DEV;
 
@@ -24,6 +24,10 @@ export const getStories = (): IStory[] => [
   {
     name: WalletId.WEB3,
     steps: hasWeb3Provider() ? [Web3ProviderDecrypt] : [Web3ProviderInstall]
+  },
+  {
+    name: WalletId.WALLETCONNECT,
+    steps: [NetworkSelectPanel, withWalletConnect(WalletConnectDecrypt)]
   },
   {
     name: WalletId.LEDGER_NANO_S,
@@ -34,28 +38,19 @@ export const getStories = (): IStory[] => [
     steps: [NetworkSelectPanel, TrezorDecrypt]
   },
   {
-    name: WalletId.SAFE_T_MINI,
-    steps: [NetworkSelectPanel, SafeTminiDecrypt]
-  },
-  {
-    name: WalletId.PARITY_SIGNER,
-    steps: [NetworkSelectPanel, ParitySignerDecrypt],
-    hideFromWalletList: true
-  },
-  {
     name: WalletId.KEYSTORE_FILE,
     steps: [NetworkSelectPanel, IS_DEV || IS_ELECTRON ? KeystoreDecrypt : InsecureWalletWarning],
-    hideFromWalletList: IS_NOT_ELECTRON_AND_IS_NOT_DEV
-  },
-  {
-    name: WalletId.MNEMONIC_PHRASE,
-    steps: [NetworkSelectPanel, IS_DEV || IS_ELECTRON ? MnemonicDecrypt : InsecureWalletWarning],
-    hideFromWalletList: IS_NOT_ELECTRON_AND_IS_NOT_DEV
+    isDisabled: IS_NOT_ELECTRON_AND_IS_NOT_DEV
   },
   {
     name: WalletId.PRIVATE_KEY,
     steps: [NetworkSelectPanel, IS_DEV || IS_ELECTRON ? PrivateKeyDecrypt : InsecureWalletWarning],
-    hideFromWalletList: IS_NOT_ELECTRON_AND_IS_NOT_DEV
+    isDisabled: IS_NOT_ELECTRON_AND_IS_NOT_DEV
+  },
+  {
+    name: WalletId.MNEMONIC_PHRASE,
+    steps: [NetworkSelectPanel, IS_DEV || IS_ELECTRON ? MnemonicDecrypt : InsecureWalletWarning],
+    isDisabled: IS_NOT_ELECTRON_AND_IS_NOT_DEV
   },
   {
     name: WalletId.VIEW_ONLY,

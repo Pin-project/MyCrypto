@@ -1,31 +1,34 @@
 import {
   Asset,
-  ExtendedAccount as IExtendedAccount,
   Network as INetwork,
   GasEstimates,
-  ExtendedAccount,
   ITxReceipt,
-  WalletId
+  WalletId,
+  StoreAccount,
+  TAddress
 } from 'v2/types';
+import { IZapConfig } from 'v2/features/DeFiZap/config';
+import { IMembershipConfig } from 'v2/features/PurchaseMembership/config';
 
 export type ISignedTx = string;
 
 export interface ITxObject {
   /* Raw Transaction Object */
-  readonly to: string;
+  readonly to: TAddress | string;
+  readonly value: string;
   readonly gasLimit: string;
+  readonly data: string;
   readonly gasPrice: string;
   readonly nonce: string;
-  readonly data: string;
-  readonly value: string;
   readonly chainId: number;
+  readonly from?: TAddress;
 }
 
 export interface ITxConfig {
   readonly rawTransaction: ITxObject /* The rawTransaction object that will be signed */;
   readonly amount: string;
   readonly receiverAddress: string;
-  readonly senderAccount: IExtendedAccount;
+  readonly senderAccount: StoreAccount;
   readonly from: string;
   readonly asset: Asset;
   readonly baseAsset: Asset;
@@ -41,7 +44,7 @@ export interface IFormikFields {
   asset: Asset;
   address: IReceiverAddress;
   amount: string;
-  account: IExtendedAccount;
+  account: StoreAccount;
   txDataField: string;
   gasEstimates: GasEstimates;
   gasPriceField: string;
@@ -55,7 +58,7 @@ export interface IFormikFields {
 
 export interface ISignComponentProps {
   network: INetwork;
-  senderAccount: ExtendedAccount;
+  senderAccount: StoreAccount;
   rawTransaction: ITxObject;
   children?: never;
   onSuccess(receipt: ITxReceipt | ISignedTx): void;
@@ -65,6 +68,9 @@ export interface IStepComponentProps {
   txConfig: ITxConfig;
   txReceipt?: ITxReceipt;
   signedTx?: string;
+  txType?: ITxType;
+  zapSelected?: IZapConfig;
+  membershipSelected?: IMembershipConfig;
   children?: never;
   completeButtonText?: string;
   onComplete(data: IFormikFields | ITxReceipt | ISignedTx | null): void;
@@ -79,8 +85,26 @@ export interface IReceiverAddress {
 export type SigningComponents = {
   readonly [k in WalletId]: React.ComponentType<ISignComponentProps> | null;
 };
+
 export enum ITxStatus {
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
-  PENDING = 'PENDING'
+  PENDING = 'PENDING',
+
+  EMPTY = 'EMPTY',
+  PREPARING = 'PREPARING',
+  READY = 'READY',
+  SIGNED = 'SIGNED',
+  BROADCASTED = 'BROADCASTED',
+  CONFIRMING = 'CONFIRMING',
+  CONFIRMED = 'CONFIRMED'
+}
+
+export enum ITxType {
+  STANDARD = 'STANDARD',
+  SWAP = 'SWAP',
+  DEFIZAP = 'DEFIZAP',
+  CONTRACT_INTERACT = 'CONTRACT_INTERACT',
+  DEPLOY_CONTRACT = 'DEPLOY_CONTRACT',
+  PURCHASE_MEMBERSHIP = 'PURCHASE_MEMBERSHIP'
 }

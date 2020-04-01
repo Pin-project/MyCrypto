@@ -13,6 +13,11 @@ import TrustIcon from 'common/assets/images/wallets/trust-3.svg';
 import Web3DefaultIcon from 'assets/images/wallets/web3-default.svg';
 import FrameIcon from 'assets/images/wallets/frame.svg';
 import CoinbaseWalletIcon from 'common/assets/images/wallets/coinbase.svg';
+import WalletConnectSVG from 'assets/images/wallets/walletconnect.svg';
+import keystoreIcon from 'assets/images/icn-keystore.svg';
+import mnemonicIcon from 'assets/images/icn-create-pw.svg';
+import privateKeyIcon from 'assets/images/icn-lock-safety.svg';
+import viewOnlyIcon from 'assets/images/icn-view-only.svg';
 
 export interface IWalletConfig {
   id: WalletId;
@@ -24,7 +29,7 @@ export interface IWalletConfig {
   lid: string;
   icon?: string;
   description: string;
-  helpLink?: string;
+  helpLink: string;
   install?: {
     getItLink?: string;
     googlePlay?: string;
@@ -165,6 +170,7 @@ export const WALLETS_CONFIG: Record<WalletId, IWalletConfig> = {
     isDesktopOnly: true,
     type: WalletType.FILE,
     lid: 'X_KEYSTORE2',
+    icon: keystoreIcon,
     description: 'UTC--2017-12-15T17-35-22.547Z--6be6e49e82425a5aa56396db03512f2cc10e95e8',
     helpLink: `${KB_URL}/general-knowledge/ethereum-blockchain/difference-between-wallet-types`
   },
@@ -176,6 +182,7 @@ export const WALLETS_CONFIG: Record<WalletId, IWalletConfig> = {
     isDesktopOnly: true,
     type: WalletType.FILE,
     lid: 'X_MNEMONIC',
+    icon: mnemonicIcon,
     description: 'brain surround have swap horror cheese file distinct',
     helpLink: `${KB_URL}/general-knowledge/ethereum-blockchain/difference-between-wallet-types`
   },
@@ -187,6 +194,7 @@ export const WALLETS_CONFIG: Record<WalletId, IWalletConfig> = {
     isDesktopOnly: true,
     type: WalletType.FILE,
     lid: 'X_PRIVKEY2',
+    icon: privateKeyIcon,
     description: 'f1d0e0789c6d40f399ca90cc674b7858de4c719e0d5752a60d5d2f6baa45d4c9',
     helpLink: `${KB_URL}/general-knowledge/ethereum-blockchain/difference-between-wallet-types`
   },
@@ -198,7 +206,21 @@ export const WALLETS_CONFIG: Record<WalletId, IWalletConfig> = {
     isDesktopOnly: false,
     type: WalletType.MISC,
     lid: 'VIEW_ADDR',
-    description: 'ADD_VIEW_ADDRESS_DESC'
+    icon: viewOnlyIcon,
+    description: 'ADD_VIEW_ADDRESS_DESC',
+    helpLink: ``
+  },
+  [WalletId.WALLETCONNECT]: {
+    id: WalletId.WALLETCONNECT,
+    name: 'WalletConnect',
+    isDeterministic: false,
+    isSecure: true,
+    isDesktopOnly: false,
+    type: WalletType.WEB3,
+    lid: 'X_WALLETCONNECT',
+    icon: WalletConnectSVG,
+    description: 'ADD_WALLETCONNECTDESC',
+    helpLink: `${KB_URL}/general-knowledge/ethereum-blockchain/what-is-walletconnect`
   }
 };
 
@@ -217,3 +239,5 @@ export const HARDWARE_WALLETS: WalletSubType = filterObjectOfObjects(WALLETS_CON
 export const WEB3_WALLETS: WalletSubType = filterObjectOfObjects(WALLETS_CONFIG)(
   ({ type }: { type: WalletType }) => type === WalletType.WEB3
 );
+
+export const getWalletConfig = (walletId: WalletId): IWalletConfig => WALLETS_CONFIG[walletId];

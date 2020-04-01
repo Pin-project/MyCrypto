@@ -1,36 +1,33 @@
 import { useContext } from 'react';
-import { Arrayish, hexlify } from 'ethers/utils';
+import { Arrayish, hexlify, bigNumberify } from 'ethers/utils';
 
-import { TUseStateReducerFactory, fromTxReceiptObj } from 'v2/utils';
+import { TUseStateReducerFactory, fromTxReceiptObj, makeTxConfigFromSignedTx } from 'v2/utils';
 import {
   Asset,
-  Network,
   ITxReceipt,
   ITxConfig,
   IFormikFields,
   ISignedTx,
   ITxObject,
-  ITxStatus
+  ITxStatus,
+  ITxType
 } from 'v2/types';
 import {
-  getNetworkByChainId,
-  getAssetByContractAndNetwork,
-  decodeTransfer,
-  toWei,
-  fromTokenBase,
-  getDecimalFromEtherUnit,
-  gasPriceToBase,
   hexWeiToString,
   getBaseAssetByNetwork,
   AccountContext,
   AssetContext,
-  NetworkContext
+  NetworkContext,
+  StoreContext
 } from 'v2/services';
-import { DEFAULT_ASSET_DECIMAL } from 'v2/config';
-import { ProviderHandler } from 'v2/services/EthService';
+import {
+  ProviderHandler,
+  inputGasPriceToHex,
+  bigNumGasPriceToViewableGwei
+} from 'v2/services/EthService';
 
 import { TStepAction } from './types';
-import { processFormDataToTx, decodeTransaction } from './helpers';
+import { processFormDataToTx } from './helpers';
 
 const txConfigInitialState = {
   tx: {
@@ -56,10 +53,8 @@ interface State {
 const TxConfigFactory: TUseStateReducerFactory<State> = ({ state, setState }) => {
   const { assets } = useContext(AssetContext);
   const { networks } = useContext(NetworkContext);
-
-  const { addNewTransactionToAccount, getAccountByAddressAndNetworkName } = useContext(
-    AccountContext
-  );
+  const { accounts } = useContext(StoreContext);
+  const { addNewTransactionToAccount } = useContext(AccountContext);
 
   const handleFormSubmit: TStepAction = (payload: IFormikFields, cb: any) => {
     const rawTransaction: ITxObject = processFormDataToTx(payload);
@@ -114,10 +109,14 @@ const TxConfigFactory: TUseStateReducerFactory<State> = ({ state, setState }) =>
       .catch(txHash => provider.getTransactionByHash(txHash))
       .then(retrievedTransactionReceipt => {
         const txReceipt = fromTxReceiptObj(retrievedTransactionReceipt)(assets, networks);
-        addNewTransactionToAccount(
-          state.txConfig.senderAccount,
-          { ...txReceipt, stage: ITxStatus.PENDING } || {}
-        );
+        addNewTransactionToAccount(state.txConfig.senderAccount, {
+          ...txReceipt,
+          to: state.txConfig.receiverAddress,
+          from: state.txConfig.senderAccount.address,
+          amount: state.txConfig.amount,
+          txType: ITxType.STANDARD,
+          stage: ITxStatus.PENDING
+        });
         setState((prevState: State) => ({
           ...prevState,
           txReceipt
@@ -131,44 +130,10 @@ const TxConfigFactory: TUseStateReducerFactory<State> = ({ state, setState }) =>
     // Used when signedTx is a buffer instead of a string.
     // Hardware wallets return a buffer.
 
-    const decodedTx = decodeTransaction(payload);
-    const networkDetected = getNetworkByChainId(decodedTx.chainId, networks);
-    const contractAsset = getAssetByContractAndNetwork(
-      decodedTx.to || undefined,
-      networkDetected
-    )(assets);
-    const baseAsset = getBaseAssetByNetwork({
-      network: networkDetected || ({} as Network),
-      assets
-    });
-
     setState((prevState: State) => ({
       ...prevState,
       signedTx, // keep a reference to signedTx;
-      txConfig: {
-        rawTransaction: prevState.txConfig.rawTransaction,
-        receiverAddress: contractAsset ? decodeTransfer(decodedTx.data)._to : decodedTx.to,
-        amount: contractAsset
-          ? fromTokenBase(
-              toWei(decodeTransfer(decodedTx.data)._value, 0),
-              contractAsset.decimal || DEFAULT_ASSET_DECIMAL
-            )
-          : decodedTx.value,
-        network: networkDetected || prevState.txConfig.network,
-        value: toWei(decodedTx.value, getDecimalFromEtherUnit('ether')).toString(),
-        asset: contractAsset || prevState.txConfig.asset,
-        baseAsset: baseAsset || prevState.txConfig.baseAsset,
-        senderAccount:
-          decodedTx.from && networkDetected
-            ? getAccountByAddressAndNetworkName(decodedTx.from, networkDetected.name) ||
-              prevState.txConfig.senderAccount
-            : prevState.txConfig.senderAccount,
-        gasPrice: gasPriceToBase(parseInt(decodedTx.gasPrice, 10)).toString(),
-        gasLimit: decodedTx.gasLimit,
-        data: decodedTx.data,
-        nonce: decodedTx.nonce.toString(),
-        from: decodedTx.from || prevState.txConfig.from
-      }
+      txConfig: makeTxConfigFromSignedTx(payload, assets, networks, accounts, prevState.txConfig)
     }));
 
     cb();
@@ -176,23 +141,43 @@ const TxConfigFactory: TUseStateReducerFactory<State> = ({ state, setState }) =>
 
   const handleSignedWeb3Tx: TStepAction = (payload: ITxReceipt | string, cb) => {
     // Payload is tx hash or receipt
+    // @ts-ignore
     const txReceipt =
       typeof payload === 'string'
         ? {
             ...state.txConfig,
             hash: payload,
-            to: state.txConfig.senderAccount.address,
-            from: state.txConfig.receiverAddress
+            to: state.txConfig.receiverAddress,
+            from: state.txConfig.senderAccount.address
           }
         : fromTxReceiptObj(payload);
-    addNewTransactionToAccount(
-      state.txConfig.senderAccount,
-      { ...txReceipt, stage: ITxStatus.PENDING } || {}
-    );
+    addNewTransactionToAccount(state.txConfig.senderAccount, {
+      ...txReceipt,
+      txType: ITxType.STANDARD,
+      stage: ITxStatus.PENDING
+    });
 
     setState((prevState: State) => ({
       ...prevState,
       txReceipt
+    }));
+    cb();
+  };
+
+  const handleResubmitTx: TStepAction = cb => {
+    const { txConfig } = state;
+    const rawTransaction = txConfig.rawTransaction;
+    // add 10 gwei to current gas price
+    const resubmitGasPrice =
+      parseFloat(bigNumGasPriceToViewableGwei(bigNumberify(rawTransaction.gasPrice))) + 10;
+    const hexGasPrice = inputGasPriceToHex(resubmitGasPrice.toString());
+
+    setState((prevState: State) => ({
+      ...prevState,
+      txConfig: {
+        ...txConfig,
+        rawTransaction: { ...rawTransaction, gasPrice: hexGasPrice }
+      }
     }));
     cb();
   };
@@ -209,6 +194,7 @@ const TxConfigFactory: TUseStateReducerFactory<State> = ({ state, setState }) =>
     handleConfirmAndSend,
     handleSignedTx,
     handleSignedWeb3Tx,
+    handleResubmitTx,
     txFactoryState
   };
 };

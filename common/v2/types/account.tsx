@@ -6,10 +6,12 @@ import { NetworkId } from './networkId';
 import { WalletId } from './walletId';
 import { ITxReceipt } from './transaction';
 import { TUuid } from './uuid';
+import { TAddress } from './address';
 
-export interface Account {
+export interface IAccount {
+  uuid: TUuid;
   label?: string;
-  address: string;
+  address: TAddress;
   networkId: NetworkId;
   assets: AssetBalanceObject[];
   wallet: WalletId;
@@ -17,11 +19,10 @@ export interface Account {
   dPath: string;
   mtime: number;
   favorite: boolean;
+  isPrivate?: boolean;
 }
 
-export interface ExtendedAccount extends Account {
-  uuid: TUuid;
-}
+export type IRawAccount = Omit<IAccount, 'uuid'>;
 
 export interface AssetBalanceObject {
   uuid: TUuid;
@@ -30,8 +31,11 @@ export interface AssetBalanceObject {
 }
 
 export type StoreAccount = Overwrite<
-  ExtendedAccount,
+  IAccount,
   {
     assets: StoreAsset[];
   }
-> & { network: Network };
+> & {
+  network: Network;
+  label: string;
+};

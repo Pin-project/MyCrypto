@@ -33,7 +33,7 @@ import { ABIItem } from '../types';
 import { getParsedQueryString } from '../utils';
 import { isValidENSName } from 'v2/services/EthService';
 
-const { BLUE_BRIGHT } = COLORS;
+const { BLUE_BRIGHT, WHITE, BLUE_LIGHT } = COLORS;
 const { SCREEN_SM } = BREAK_POINTS;
 
 const NetworkSelectorWrapper = styled.div`
@@ -102,15 +102,6 @@ const SaveButtonWrapper = styled.div`
     justify-content: flex-start;
     padding-left: 0px;
     padding-bottom: 8px;
-  }
-`;
-
-// TODO: Fix the dropdown component instead of overriding styles
-const DropdownContainer = styled.div`
-  .is-open > .Select-control > .Select-multi-value-wrapper > .Select-input:only-child {
-    transform: translateY(0%);
-    padding: 12px 15px;
-    position: inherit;
   }
 `;
 
@@ -327,26 +318,24 @@ function Interact(props: CombinedProps) {
                   )}
                 </ContractSelectLabelWrapper>
 
-                <DropdownContainer>
-                  <Dropdown
-                    value={contract}
-                    options={contracts}
-                    onChange={option => {
-                      if (option.address !== 'custom') {
-                        setFieldValue('address', {
-                          display: option.address,
-                          value: option.address
-                        });
-                      } else {
-                        setFieldValue('address', initialFormikValues.address);
-                      }
-                      handleContractSelected(option);
-                    }}
-                    optionComponent={ContractDropdownOption}
-                    valueComponent={ContractDropdownValue}
-                    searchable={true}
-                  />
-                </DropdownContainer>
+                <Dropdown
+                  value={contract}
+                  options={contracts}
+                  onChange={option => {
+                    if (option.address !== 'custom') {
+                      setFieldValue('address', {
+                        display: option.address,
+                        value: option.address
+                      });
+                    } else {
+                      setFieldValue('address', initialFormikValues.address);
+                    }
+                    handleContractSelected(option);
+                  }}
+                  optionComponent={ContractDropdownOption}
+                  valueComponent={ContractDropdownValue}
+                  searchable={true}
+                />
               </FieldWrapper>
               <Separator />
               <FieldWrapper>
@@ -400,7 +389,12 @@ function Interact(props: CombinedProps) {
                       onChange={({ target: { value } }) => handleCustomContractNameChanged(value)}
                     />
                     <SaveButtonWrapper>
-                      <Button large={false} secondary={true} onClick={saveContract}>
+                      <Button
+                        color={BLUE_LIGHT}
+                        large={false}
+                        secondary={true}
+                        onClick={saveContract}
+                      >
                         {translateRaw('SAVE_CONTRACT')}
                       </Button>
                     </SaveButtonWrapper>
@@ -415,7 +409,7 @@ function Interact(props: CombinedProps) {
             </FieldWrapper>
 
             <ButtonWrapper>
-              <Button disabled={wasContractInteracted} onClick={submitInteract}>
+              <Button color={WHITE} disabled={wasContractInteracted} onClick={submitInteract}>
                 {translateRaw('INTERACT_WITH_CONTRACT')}
               </Button>
             </ButtonWrapper>

@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { useUpdateEffect } from 'v2/vendor';
 import { ROUTE_PATHS, WALLETS_CONFIG, IWalletConfig } from 'v2/config';
 import { WalletId, IStory } from 'v2/types';
-import { ContentPanel, WalletList } from 'v2/components';
+import { ExtendedContentPanel, WalletList } from 'v2/components';
 import { StoreContext, AccountContext } from 'v2/services/Store';
 
 import { NotificationsContext, NotificationTemplates } from '../NotificationsPanel';
@@ -109,15 +109,22 @@ const AddAccountFlow = withRouter(({ history, match }) => {
     updateFormState({ type: ActionType.SELECT_ACCOUNT_TYPE, payload: { accountType: name } });
   };
 
+  const calculateMargin = (index: number) => (index < 4 ? '2%' : '10px');
+
   const renderDefault = () => {
     return (
-      <ContentPanel>
+      <ExtendedContentPanel width="800px">
         <TransitionGroup>
           <CSSTransition classNames="DecryptContent" timeout={500}>
-            <WalletList wallets={getStories()} onSelect={onWalletSelection} showHeader={true} />
+            <WalletList
+              wallets={getStories()}
+              onSelect={onWalletSelection}
+              showHeader={true}
+              calculateMargin={calculateMargin}
+            />
           </CSSTransition>
         </TransitionGroup>
-      </ContentPanel>
+      </ExtendedContentPanel>
     );
   };
 
@@ -126,20 +133,25 @@ const AddAccountFlow = withRouter(({ history, match }) => {
     const Step = steps[step];
 
     return (
-      <ContentPanel onBack={goToPreviousStep} stepper={{ current: step + 1, total: steps.length }}>
+      <ExtendedContentPanel
+        onBack={goToPreviousStep}
+        stepper={{ current: step + 1, total: steps.length }}
+        width="800px"
+      >
         <TransitionGroup>
           <CSSTransition classNames="DecryptContent" timeout={500}>
             <Step
               wallet={getWalletInfo(storyName)}
               goToStart={goToStart}
               goToNextStep={goToNextStep}
+              goToPreviousStep={goToPreviousStep}
               onUnlock={(payload: any) => updateFormState({ type: ActionType.ON_UNLOCK, payload })}
               formData={formData}
               formDispatch={updateFormState}
             />
           </CSSTransition>
         </TransitionGroup>
-      </ContentPanel>
+      </ExtendedContentPanel>
     );
   };
 

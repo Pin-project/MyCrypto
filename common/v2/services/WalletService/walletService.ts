@@ -23,6 +23,7 @@ import { unlockKeystore, KeystoreUnlockParams } from './keystore';
 import { unlockMnemonic, MnemonicUnlockParams } from './mnemonic';
 import { unlockPrivateKey, PrivateKeyUnlockParams } from './privatekey';
 import { unlockWeb3 } from './web3';
+import { WalletConnectWallet, IUseWalletConnect } from './walletconnect';
 
 export const WalletFactory = (walletId: WalletId): WalletService | any => {
   switch (walletId) {
@@ -73,6 +74,11 @@ export const WalletFactory = (walletId: WalletId): WalletService | any => {
     case WalletId.VIEW_ONLY:
       return {
         init: (address: TAddress) => new AddressOnlyWallet(address)
+      };
+    case WalletId.WALLETCONNECT:
+      return {
+        init: (address: TAddress, signMessageHandler: IUseWalletConnect['signMessage']) =>
+          new WalletConnectWallet(address, signMessageHandler)
       };
     default:
       throw new Error('[WalletService]: Unknown WalletId');

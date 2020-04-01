@@ -1,15 +1,28 @@
 export * from './error';
-export * from './typeGuards';
+export { notUndefined, isTxSigned, isTxHash } from './typeGuards';
 export * from './validators';
 export { IS_ELECTRON, IS_MOBILE, IS_DOWNLOADABLE } from './platform';
 export { hasWeb3Provider, IS_DEV, IS_PROD } from './environment';
 export { getFeaturedOS } from './getFeaturedOS';
-export { generateUUID, generateAssetUUID, generateContractUUID } from './generateUUID';
+export { generateUUID, generateAssetUUID, generateContractUUID, getUUID } from './generateUUID';
 export { isUrl } from './isUrl';
 export { truncate } from './truncate';
 export { useOnClickOutside } from './useOnClickOutside';
 export { trace } from './trace';
-export { convertToFiat, convertToFiatFromAsset, weiToFloat } from './convert';
+export {
+  convertToFiat,
+  convertToFiatFromAsset,
+  weiToFloat,
+  convertToBN,
+  divideBNFloats,
+  multiplyBNFloats,
+  addBNFloats,
+  subtractBNFloats,
+  trimBN,
+  calculateMarkup,
+  withCommission
+} from './convert';
+export { EtherUUID } from './constants';
 export { isArrayEqual } from './isArrayEqual';
 export { useInterval } from './useInterval';
 export * from './useStateReducer';
@@ -26,7 +39,7 @@ export {
 export { makeBlob } from './blob';
 export { default as consoleAdvertisement } from './consoleAdvertisement';
 export { tap } from './tap';
-export { fromTxReceiptObj } from './transaction';
+export { fromTxReceiptObj, makeTxConfigFromSignedTx } from './transaction';
 export {
   formatErrorEmail,
   formatSupportEmail,
@@ -34,5 +47,9 @@ export {
   formatErrorEmailMarkdown
 } from './emailFormatter';
 export { withContext } from './withContext';
-export { getWeb3Config } from './web3';
+export { getWeb3Config, isWeb3Wallet } from './web3';
 export { toArray } from './toArray';
+export { objToString } from './objToString';
+export * from './constants';
+export { bigify } from './bigify';
+export { useTxMulti } from './useTxMulti';

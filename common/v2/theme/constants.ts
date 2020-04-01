@@ -1,7 +1,7 @@
 import { light } from '@mycrypto/ui';
 
 // Direct require to customise the webpack default scss loader
-const GAU_COLORS = require('sass-extract-loader?{"plugins": ["sass-extract-js"]}!./colors.scss');
+export const GAU_COLORS = require('sass-extract-loader?{"plugins": ["sass-extract-js"]}!./colors.scss');
 
 // Combine the themes in a single object to be consummed by SC ThemeProvider
 export const GAU_THEME = Object.assign({}, light, {
@@ -12,12 +12,17 @@ export const GAU_THEME = Object.assign({}, light, {
 
 export const COLORS = {
   BLUE_BRIGHT: '#1eb8e7',
+  BLUE_LIGHT: '#007896',
+  BLUE_LIGHTEST: '#E4EDFD',
+  BLUE_LIGHT_DARKISH: '#006077',
   BLUE_GREY: '#b5bfc7',
   BLUE_GREY_LIGHTEST: '#fafcfc',
   BLUE_DARK_SLATE: '#163150',
   BLUE_DARK: '#1c314e',
+  BLUE_MYC: '#007A99',
 
   LEMON_GRASS: '#99968C',
+  LIGHT_GREEN: '#B3DD87',
   SUCCESS_GREEN: '#5dba5a',
   ERROR_RED: '#FF5050',
   PASTEL_RED: '#ef4747',
@@ -36,8 +41,12 @@ export const COLORS = {
   GREY_GEYSER: '#d6dce5',
   GREY_ATHENS: '#e8eaed',
   GREYISH_BROWN: '#424242',
+
   PURPLE: '#A086F7',
-  ORANGE: '#FA863F'
+  LIGHT_PURPLE: '#A682FF',
+  ORANGE: '#FA863F',
+  GREEN: '#28a745',
+  RED: '#FF0000'
 };
 
 export const BREAK_POINTS = {
@@ -57,6 +66,10 @@ export const FONT_SIZE = {
   LG: '20px',
   XL: '24px',
   XXL: '36px'
+};
+
+export const LINE_HEIGHT = {
+  BASE: '16px'
 };
 
 export const SPACING = {

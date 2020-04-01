@@ -35,7 +35,7 @@ export {
   AssetWithDetails
 } from './asset';
 import { StoreAccount } from './account';
-export { Account, ExtendedAccount } from './account';
+export { IRawAccount, IAccount } from './account';
 export type StoreAccount = StoreAccount;
 export { AddressBook, ExtendedAddressBook } from './addressBook';
 export { Contract, ExtendedContract } from './contract';
@@ -47,18 +47,22 @@ export { ISettings } from './settings';
 export { LocalStorage, LSKeys, DataStore, DataStoreItem, DataStoreEntry } from './store';
 export { Notification, ExtendedNotification } from './notification';
 export { IERC20 } from './erc20';
+export { IUNLOCKLOCK } from './unlockProtocolToken';
 export { ABIFunc, ABIFuncParamless } from './abiFunc';
 export {
   ITransaction,
   IHexStrTransaction,
   IHexStrWeb3Transaction,
-  ITxReceipt
+  ITxReceipt,
+  ITxHash,
+  ITxSigned
 } from './transaction';
 export {
   ISignedTx,
   ITxObject,
   ITxConfig,
   ITxStatus,
+  ITxType,
   IFormikFields,
   ISignComponentProps,
   IStepComponentProps,
@@ -77,3 +81,6 @@ export { GasPrice, GasEstimates } from './gas';
 export { BannerType } from './banner';
 export { ToastConfig, ToastType, ToastConfigsProps } from './toast';
 export { InlineMessageType } from './inlineMessages';
+export { ErrorObject } from './errorObject';
+export { TAction, TStateGetter } from './action';
+export { TxParcel } from 'v2/utils/useTxMulti/types'; // Specific re-export to avoid Circular deps

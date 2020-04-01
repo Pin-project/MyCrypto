@@ -8,6 +8,7 @@ import { TSymbol } from 'v2/types/symbols';
 import AssetIcon from './AssetIcon';
 import Typography from './Typography';
 interface Props {
+  disabled?: boolean;
   asset: Asset;
   value: string;
   placeholder?: string;
@@ -16,7 +17,8 @@ interface Props {
 }
 
 const SInput = styled(Input)`
-  font-size: 1rem !important; // to override Typography from mycrypto/ui
+  /* Override Typography from mycrypto/ui */
+  font-size: 1rem !important;
 `;
 
 const SAssetIcon = styled(AssetIcon)`

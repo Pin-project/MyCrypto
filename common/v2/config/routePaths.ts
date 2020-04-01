@@ -77,6 +77,11 @@ const PATHS: IRoutePath[] = [
     path: '/send'
   },
   {
+    name: 'DEFIZAP',
+    title: 'DeFiZap',
+    path: '/defi/zap'
+  },
+  {
     name: 'SETTINGS',
     title: 'Settings',
     path: '/settings'
@@ -120,6 +125,11 @@ const PATHS: IRoutePath[] = [
     name: 'DEPLOY_CONTRACTS',
     title: 'Deploy Contracts',
     path: '/deploy-contracts'
+  },
+  {
+    name: 'MYC_MEMBERSHIP',
+    title: 'MyCrypto Membership',
+    path: '/membership'
   }
 ];
 

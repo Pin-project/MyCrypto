@@ -1,6 +1,6 @@
 import React, { Component, createContext } from 'react';
 import translate from 'v2/translations';
-import { formatErrorEmail } from 'v2/utils';
+import { formatErrorEmail, IS_DEV } from 'v2/utils';
 import { ROUTE_PATHS } from 'v2/config';
 import { IRoutePath } from 'v2/types';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -26,7 +26,7 @@ export const ErrorContext = createContext({} as ProviderState);
 class ErrorProvider extends Component<RouteComponentProps<{}>> {
   public state: ProviderState = {
     error: undefined,
-    suppressErrors: false,
+    suppressErrors: IS_DEV, //Remove Error catching when in dev environment.
     toggleSuppressErrors: () => {
       this.setState((prevState: ProviderState) => {
         return { suppressErrors: !prevState.suppressErrors };
@@ -46,16 +46,18 @@ class ErrorProvider extends Component<RouteComponentProps<{}>> {
   }
 
   public componentDidCatch(error: Error) {
-    const path = Object.values(ROUTE_PATHS).find(p => p.path === window.location.pathname);
     console.error(error);
-    this.props.history.replace(ROUTE_PATHS.HOME.path);
-    this.setState({
-      error: { error, path }
-    });
-    clearTimeout(errorTimer);
-    errorTimer = setTimeout(() => {
-      this.setState({ error: undefined });
-    }, ERROR_TIMEOUT_MS);
+    if (!this.state.suppressErrors) {
+      const path = Object.values(ROUTE_PATHS).find(p => p.path === window.location.pathname);
+      this.props.history.replace(ROUTE_PATHS.HOME.path);
+      this.setState({
+        error: { error, path }
+      });
+      clearTimeout(errorTimer);
+      errorTimer = setTimeout(() => {
+        this.setState({ error: undefined });
+      }, ERROR_TIMEOUT_MS);
+    }
   }
 
   private shouldShowError = () => {

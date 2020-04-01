@@ -1,24 +1,29 @@
 import React, { useContext, useState } from 'react';
 import Styled from 'styled-components';
 import BN from 'bn.js';
-import { Button } from '@mycrypto/ui';
+
+import { AddressBookContext, StoreContext } from 'v2/services/Store';
+import { Amount, AssetIcon, Button } from 'v2/components';
+import { fromWei, Wei, totalTxFeeToString, totalTxFeeToWei } from 'v2/services/EthService';
+import { RatesContext } from 'v2/services/RatesProvider';
+import { IStepComponentProps, ExtendedAddressBook, ITxType } from 'v2/types';
+import { BREAK_POINTS, SPACING, COLORS } from 'v2/theme';
+import { convertToFiat } from 'v2/utils';
+import translate, { translateRaw } from 'v2/translations';
+import { TSymbol } from 'v2/types/symbols';
+import { ZapSelectedBanner, DeFiZapLogo } from 'v2/features/DeFiZap';
+import { MembershipSelectedBanner } from 'v2/features/PurchaseMembership';
+
+import TransactionDetailsDisplay from './displays/TransactionDetailsDisplay';
+import TxIntermediaryDisplay from './displays/TxIntermediaryDisplay';
+import { FromToAccount } from './displays';
+import { constructSenderFromTxConfig } from './helpers';
+import { ISender } from './types';
 
 import feeIcon from 'common/assets/images/icn-fee.svg';
 import sendIcon from 'common/assets/images/icn-send.svg';
 import walletIcon from 'common/assets/images/icn-wallet.svg';
-import { AddressBookContext } from 'v2/services/Store';
-import { Amount, AssetIcon } from 'v2/components';
-import { fromWei, Wei, totalTxFeeToString, totalTxFeeToWei } from 'v2/services/EthService';
-import { RatesContext } from 'v2/services/RatesProvider';
-import { IStepComponentProps } from 'v2/types';
-import { BREAK_POINTS } from 'v2/theme';
 
-import TransactionDetailsDisplay from './displays/TransactionDetailsDisplay';
-import TransactionIntermediaryDisplay from './displays/TransactionIntermediaryDisplay';
-import { convertToFiat, truncate } from 'v2/utils';
-import translate from 'v2/translations';
-import { TSymbol } from 'v2/types/symbols';
-import Account from '../Account';
 const { SCREEN_XS } = BREAK_POINTS;
 
 const ConfirmTransactionWrapper = Styled.div`
@@ -46,31 +51,16 @@ const ColumnWrapper = Styled.div<{ bold?: boolean }>`
     font-size: 18px;
   }
   img {
-    width: 30px;
+    width: auto;
     height: 30px;
     margin-right: 10px;
   }
 `;
 
-const AddressWrapper = Styled(ColumnWrapper)<{ position: string }>`
-  font-size: 16px;
-  & > div {
-    margin: 10px 0 10px 0;
-    padding: 12px;
-    background: #f8f8f8;
-    font-size: 16px;
+const SendButton = Styled(Button)`
+  > div {
+    justify-content: center;
   }
-  @media (min-width: ${SCREEN_XS}) {
-    margin: 0 10px 0 10px;
-    ${props => `margin-${props.position}: 0;`}
-  }
-
-  // Ensure that label and address are stacked vertically
-  & > div > div {
-    display: flex;
-    flex-direction: column;
-  }
-}
 `;
 
 const AmountWrapper = Styled(ColumnWrapper)`
@@ -93,42 +83,91 @@ const Divider = Styled.div`
   background: #e3edff;
 `;
 
-const SendButton = Styled(Button)`
-  width: 100%;
+const DeFiZapLogoContainer = Styled.div`
+  margin-top: ${SPACING.BASE};
+`;
+const DeFiDisclaimerWrapper = Styled.p`
+  color: ${COLORS.GREY};
+  margin-bottom: ${SPACING.MD};
 `;
 
 export default function ConfirmTransaction({
+  txType = ITxType.STANDARD,
+  membershipSelected,
+  zapSelected,
   txConfig,
   onComplete,
   signedTx
 }: IStepComponentProps) {
-  const { getContactByAccount, getContactByAddressAndNetwork } = useContext(AddressBookContext);
-  const [isBroadcastingTx, setIsBroadcastingTx] = useState(false);
-  const handleApprove = () => {
-    setIsBroadcastingTx(true);
-    onComplete(null);
-  };
+  const { asset, baseAsset, receiverAddress, network, from } = txConfig;
 
+  const { getContactByAddressAndNetworkId } = useContext(AddressBookContext);
   const { getAssetRate } = useContext(RatesContext);
-  const recipientContact = getContactByAddressAndNetwork(
-    txConfig.receiverAddress,
-    txConfig.network
-  );
-  const recipientLabel = recipientContact ? recipientContact.label : 'Unknown Address';
+  const { accounts } = useContext(StoreContext);
+  /* Get contact info */
+  const recipientContact = getContactByAddressAndNetworkId(receiverAddress, network.id);
+  const senderContact = getContactByAddressAndNetworkId(from, network.id);
+  const sender = constructSenderFromTxConfig(txConfig, accounts);
 
+  /* Get Rates */
+  const assetRate = getAssetRate(asset);
+  const baseAssetRate = getAssetRate(baseAsset);
+
+  return (
+    <ConfirmTransactionUI
+      assetRate={assetRate}
+      baseAssetRate={baseAssetRate}
+      senderContact={senderContact}
+      sender={sender}
+      txType={txType}
+      zapSelected={zapSelected}
+      membershipSelected={membershipSelected}
+      txConfig={txConfig}
+      recipientContact={recipientContact}
+      onComplete={onComplete}
+      signedTx={signedTx}
+    />
+  );
+}
+
+interface DataProps {
+  assetRate?: number;
+  baseAssetRate?: number;
+  recipientContact?: ExtendedAddressBook;
+  senderContact?: ExtendedAddressBook;
+  sender: ISender;
+}
+
+export const ConfirmTransactionUI = ({
+  assetRate,
+  baseAssetRate,
+  senderContact,
+  sender,
+  recipientContact,
+  zapSelected,
+  membershipSelected,
+  txType,
+  txConfig,
+  onComplete,
+  signedTx
+}: Omit<IStepComponentProps, 'resetFlow'> & DataProps) => {
   const {
     asset,
     gasPrice,
     gasLimit,
     value,
     amount,
-    senderAccount,
     receiverAddress,
-    network,
     nonce,
     data,
     baseAsset
   } = txConfig;
+  const [isBroadcastingTx, setIsBroadcastingTx] = useState(false);
+  const handleApprove = () => {
+    setIsBroadcastingTx(true);
+    onComplete(null);
+  };
+
   const assetType = asset.type;
 
   /* Calculate Transaction Fee */
@@ -137,44 +176,53 @@ export default function ConfirmTransaction({
 
   /* Calculate total base asset amount */
   const valueWei = Wei(value);
-  const totalEtherEgress = parseFloat(fromWei(valueWei.add(transactionFeeWei), 'ether')).toFixed(6); // @TODO: BN math, add amount + maxCost !In same symbol
-
-  /* Determing User's Contact */
-  const senderContact = getContactByAccount(senderAccount);
+  // @TODO: BN math, add amount + maxCost !In same symbol
+  const totalEtherEgress = parseFloat(fromWei(valueWei.add(transactionFeeWei), 'ether')).toFixed(6);
   const senderAccountLabel = senderContact ? senderContact.label : 'Unknown Account';
-
-  /* Get Rates */
-  const assetRate = getAssetRate(asset);
-  const baseAssetRate = getAssetRate(baseAsset);
+  const recipientLabel = recipientContact ? recipientContact.label : 'Unknown Address';
 
   return (
     <ConfirmTransactionWrapper>
-      <RowWrapper stack={true}>
-        <AddressWrapper position={'left'}>
-          {translate('CONFIRM_TX_FROM')}
-          <Account
-            address={senderAccount ? senderAccount.address : 'Unknown'}
-            title={senderAccountLabel}
-            truncate={truncate}
-          />
-        </AddressWrapper>
-        <AddressWrapper position={'right'}>
-          {translate('CONFIRM_TX_TO')}
-          <Account
-            address={receiverAddress || 'Unknown'}
-            title={recipientLabel}
-            truncate={truncate}
-          />
-        </AddressWrapper>
-      </RowWrapper>
-      {assetType === 'erc20' && (
+      {txType === ITxType.DEFIZAP && zapSelected && <ZapSelectedBanner zapSelected={zapSelected} />}
+      {txType === ITxType.PURCHASE_MEMBERSHIP && membershipSelected && (
+        <MembershipSelectedBanner membershipSelected={membershipSelected} />
+      )}
+      <FromToAccount
+        from={{
+          address: sender.address,
+          label: senderAccountLabel
+        }}
+        to={{
+          address: (receiverAddress || 'Unknown') as never,
+          label: recipientLabel
+        }}
+        displayToAddress={txType !== ITxType.DEFIZAP && txType !== ITxType.PURCHASE_MEMBERSHIP}
+      />
+      {txType === ITxType.DEFIZAP && zapSelected && (
         <RowWrapper>
-          <TransactionIntermediaryDisplay asset={asset} />
+          <TxIntermediaryDisplay address={zapSelected.contractAddress} contractName={'DeFi Zap'} />
+        </RowWrapper>
+      )}
+      {assetType === 'erc20' &&
+        asset &&
+        asset.contractAddress &&
+        txType !== ITxType.PURCHASE_MEMBERSHIP && (
+          <RowWrapper>
+            <TxIntermediaryDisplay address={asset.contractAddress} contractName={asset.ticker} />
+          </RowWrapper>
+        )}
+      {txType === ITxType.PURCHASE_MEMBERSHIP && membershipSelected && (
+        <RowWrapper>
+          <TxIntermediaryDisplay
+            address={membershipSelected.contractAddress}
+            contractName={asset.ticker}
+          />
         </RowWrapper>
       )}
       <RowWrapper>
         <ColumnWrapper>
-          <img src={sendIcon} alt="Send" /> {translate('CONFIRM_TX_SENDING')}
+          <img src={sendIcon} alt="Send" />
+          {translate(txType === ITxType.DEFIZAP ? 'ZAP_CONFIRM_TX_SENDING' : 'CONFIRM_TX_SENDING')}
         </ColumnWrapper>
         <AmountWrapper>
           <AssetIcon symbol={asset.ticker as TSymbol} size={'30px'} />
@@ -234,20 +282,29 @@ export default function ConfirmTransaction({
         baseAsset={baseAsset}
         asset={asset}
         data={data}
-        network={network}
-        senderAccount={senderAccount}
+        sender={sender}
         gasLimit={gasLimit}
         gasPrice={gasPrice}
         nonce={nonce}
         signedTransaction={signedTx}
       />
+      {txType === ITxType.DEFIZAP && (
+        <DeFiDisclaimerWrapper>{translate('ZAP_CONFIRM_DISCLAIMER')}</DeFiDisclaimerWrapper>
+      )}
       <SendButton
         onClick={handleApprove}
         disabled={isBroadcastingTx}
         className="ConfirmTransaction-button"
+        loading={isBroadcastingTx}
+        fullwidth={true}
       >
-        {isBroadcastingTx ? translate('SUBMITTING') : translate('CONFIRM_AND_SEND')}
+        {isBroadcastingTx ? translateRaw('SUBMITTING') : translateRaw('CONFIRM_AND_SEND')}
       </SendButton>
+      {txType === ITxType.DEFIZAP && (
+        <DeFiZapLogoContainer>
+          <DeFiZapLogo />
+        </DeFiZapLogoContainer>
+      )}
     </ConfirmTransactionWrapper>
   );
-}
+};

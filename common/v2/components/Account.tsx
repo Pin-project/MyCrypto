@@ -1,9 +1,10 @@
 import React, { ReactNode } from 'react';
 
 import styled from 'styled-components';
-import { Avatar, Identicon, Tooltip, scale } from '@mycrypto/ui';
+import { Avatar, Identicon, scale } from '@mycrypto/ui';
 import Typography from './Typography';
 import EthAddress from './EthAddress';
+import Tooltip from './Tooltip';
 
 const Flex = styled.div`
   align-items: center;
@@ -17,6 +18,7 @@ const Content = styled.div`
 const Title = styled(Typography)`
   display: inline;
   font-size: ${scale(0.5)};
+  word-break: break-word;
 `;
 
 Title.defaultProps = { as: 'div' };
@@ -43,6 +45,7 @@ const SIdenticon = styled(Identicon)`
   &&& img {
     height: 45px;
     width: 44px;
+    max-width: none;
   }
 `;
 

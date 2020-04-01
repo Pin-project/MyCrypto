@@ -1,12 +1,16 @@
 import React, { useContext } from 'react';
 import { Formik, Form, Field, FieldProps } from 'formik';
-import { Button, Input } from '@mycrypto/ui';
+import * as Yup from 'yup';
+import { Button } from '@mycrypto/ui';
 import styled from 'styled-components';
 
 import backArrowIcon from 'common/assets/images/icn-back-arrow.svg';
 import { DashboardPanel, NetworkSelectDropdown, InputField } from 'v2/components';
 import { AddressBook } from 'v2/types';
 import { ToastContext } from 'v2/features/Toasts';
+import { translateRaw } from 'v2/translations';
+import { isValidETHAddress } from 'v2/services/EthService';
+import { AddressBookContext } from 'v2/services';
 
 const AddToAddressBookPanel = styled(DashboardPanel)`
   padding: 24px 30px;
@@ -39,13 +43,35 @@ const AddressBookButtons = styled.div`
   }
 `;
 
+const SNetworkSelectDropdown = styled(NetworkSelectDropdown)`
+  margin-bottom: 15px;
+`;
+
 interface Props {
   toggleFlipped(): void;
   createAddressBooks(values: AddressBook): void;
 }
 
 export default function AddToAddressBook({ toggleFlipped, createAddressBooks }: Props) {
+  const { getContactByAddress } = useContext(AddressBookContext);
+
+  const Schema = Yup.object().shape({
+    label: Yup.string().required(translateRaw('REQUIRED')),
+    address: Yup.string()
+      .test('check-eth-address', translateRaw('TO_FIELD_ERROR'), value => isValidETHAddress(value))
+      .test('doesnt-exist', translateRaw('ADDRESS_ALREADY_ADDED'), function(value) {
+        const contact = getContactByAddress(value);
+        if (contact !== undefined) {
+          return this.createError({
+            message: translateRaw('ADDRESS_ALREADY_ADDED', { $label: contact.label })
+          });
+        }
+        return true;
+      })
+  });
+
   const { displayToast, toastTemplates } = useContext(ToastContext);
+
   return (
     <AddToAddressBookPanel
       heading={
@@ -59,6 +85,7 @@ export default function AddToAddressBook({ toggleFlipped, createAddressBooks }: 
       padChildren={true}
     >
       <Formik
+        validationSchema={Schema}
         initialValues={{
           label: '',
           address: '',
@@ -72,14 +99,14 @@ export default function AddToAddressBook({ toggleFlipped, createAddressBooks }: 
           toggleFlipped();
         }}
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, errors }) => (
           <Form>
             <AddressFieldset>
               <label htmlFor="label">Label</label>
               <Field
                 name="label"
-                render={({ field }: FieldProps<AddressBook>) => (
-                  <Input {...field} placeholder="Enter name of address" />
+                render={({ field }: FieldProps<string>) => (
+                  <InputField {...field} placeholder="Enter name of address" />
                 )}
               />
             </AddressFieldset>
@@ -87,16 +114,20 @@ export default function AddToAddressBook({ toggleFlipped, createAddressBooks }: 
               <label htmlFor="address">Address</label>
               <Field
                 name="address"
-                render={({ field }: FieldProps<AddressBook>) => (
-                  <Input {...field} placeholder="Enter the address" />
+                render={({ field }: FieldProps<string>) => (
+                  <InputField
+                    inputError={errors && errors.address}
+                    {...field}
+                    placeholder="Enter the address"
+                  />
                 )}
               />
             </AddressFieldset>
             <AddressFieldset>
               <Field
                 name="network"
-                render={({ field, form }: FieldProps<AddressBook>) => (
-                  <NetworkSelectDropdown
+                render={({ field, form }: FieldProps<string>) => (
+                  <SNetworkSelectDropdown
                     network={field.value}
                     onChange={e => form.setFieldValue(field.name, e)}
                   />
@@ -107,7 +138,7 @@ export default function AddToAddressBook({ toggleFlipped, createAddressBooks }: 
               <label htmlFor="notes">Notes</label>
               <Field
                 name="notes"
-                render={({ field }: FieldProps<AddressBook>) => (
+                render={({ field }: FieldProps<string>) => (
                   <InputField
                     {...field}
                     textarea={true}

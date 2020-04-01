@@ -7,6 +7,7 @@ import translate, { translateRaw } from 'v2/translations';
 import { ContentPanel, Button, RouterLink } from 'v2/components';
 import { SettingsContext } from 'v2/services/Store';
 import { ROUTE_PATHS } from 'v2/config';
+import { COLORS } from 'v2/theme';
 
 import Downloader from './Downloader';
 
@@ -37,7 +38,9 @@ export function Export(props: RouteComponentProps<{}>) {
         <Typography>{translate('SETTINGS_EXPORT_INFO')}</Typography>
         <CacheDisplay>{appStore}</CacheDisplay>
         <RouterLink fullwidth={true} to={ROUTE_PATHS.SETTINGS.path}>
-          <Button fullwidth={true}>{translate('SETTINGS_EXPORT_LEAVE')}</Button>
+          <Button color={COLORS.WHITE} fullwidth={true}>
+            {translate('SETTINGS_EXPORT_LEAVE')}
+          </Button>
         </RouterLink>
         <Downloader appStore={appStore} />
       </ImportSuccessContainer>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import styled from 'styled-components';
 import Select, { Option } from 'react-select';
 import { Table, Button } from '@mycrypto/ui';
 import BN from 'bn.js';
@@ -25,6 +26,10 @@ import './DeterministicWallets.scss';
 import { DeterministicWalletData, getDeterministicWallets } from 'v2/services/WalletService';
 import { getBaseAssetBalances, BalanceMap } from 'v2/services/Store/BalanceService';
 import Account from '../Account';
+
+const FooterLink = styled.div`
+  text-align: center;
+`;
 
 function Radio({ checked }: { checked: boolean }) {
   return <img className="clickable radio-image" src={checked ? radioChecked : radio} />;
@@ -131,7 +136,7 @@ export function DeterministicWalletsClass({
       return getBaseAssetBalances(addressesToLookup, network).then((balanceMapData: BalanceMap) => {
         const walletsWithBalances: DeterministicWalletData[] = wallets.map(wallet => {
           const balance = balanceMapData[wallet.address];
-          const value = new BN(balance.toString(10));
+          const value = new BN(balance.toString());
           return {
             ...wallet,
             value
@@ -330,6 +335,7 @@ export function DeterministicWalletsClass({
           {translate('ACTION_6')}
         </Button>
       </div>
+      <FooterLink>{translate('FIND_ETH_LINK')}</FooterLink>
     </div>
   );
 }

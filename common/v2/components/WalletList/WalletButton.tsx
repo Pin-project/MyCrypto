@@ -1,10 +1,12 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+import { Tooltip } from '@mycrypto/ui';
 
 import { WalletId } from 'v2/types';
 import { BREAK_POINTS, COLORS } from 'v2/theme';
+import translate from 'v2/translations';
 
-const { SCREEN_SM } = BREAK_POINTS;
+const { SCREEN_SM, SCREEN_XS } = BREAK_POINTS;
 const { WHITE } = COLORS;
 
 interface OwnProps {
@@ -15,11 +17,8 @@ interface OwnProps {
   isSecure?: boolean;
   isDisabled?: boolean;
   disableReason?: string;
+  margin?: string;
   onClick(walletType: any): void;
-}
-
-interface StateProps {
-  isFormatDisabled?: boolean;
 }
 
 interface Icon {
@@ -29,25 +28,25 @@ interface Icon {
   arialabel?: string;
 }
 
-type Props = OwnProps & StateProps & Icon;
+type Props = OwnProps & Icon;
 
-const WalletButtonWrapper = styled.div`
-  @keyframes wallet-button-enter {
-    0% {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0px);
-    }
+const WalletButtonEnterAnimation = (isDisabled?: boolean) => keyframes`
+  0% { 
+    opacity: 0;
+    transform: translateY(6px);
   }
+  100% { 
+    ${isDisabled ? 'opacity: 0.6;' : 'opacity: 1;'}
+    transform: translateY(0px);
+  }
+`;
 
+const WalletButtonWrapper = styled.div<{ margin?: string; isDisabled?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 10px;
+  margin: 10px ${props => props.margin};
   height: 200px;
   width: 200px;
   padding: 25px 15px;
@@ -57,13 +56,14 @@ const WalletButtonWrapper = styled.div`
   text-align: center;
   cursor: pointer;
   transition: transform 150ms ease, box-shadow 150ms ease;
-  animation: wallet-button-enter 400ms ease 1;
+  animation: ${({ isDisabled }) => WalletButtonEnterAnimation(isDisabled)} 400ms ease;
+  ${({ isDisabled }) => isDisabled && 'opacity: 0.6;'};
 
   :hover {
-    opacity: 0.8;
+    ${({ isDisabled }) => (isDisabled ? 'opacity: 0.6;' : 'opacity: 0.8;')}
   }
 
-  @media only screen and (max-width: ${SCREEN_SM}) {
+  @media only screen and (max-width: ${SCREEN_XS}) {
     height: 150px;
     width: 150px;
   }
@@ -77,26 +77,29 @@ const WalletLabel = styled.div`
 
 const WalletIcon = styled.img`
   max-height: 75px;
-  opacity: 0.8;
 
   @media screen and (max-width: ${SCREEN_SM}) {
     max-height: 60px;
   }
 `;
 
-export class WalletButton extends React.PureComponent<Props> {
-  public render() {
-    const { name, icon } = this.props;
+export const WalletButton = (props: Props) => {
+  const { name, icon, margin, isDisabled, walletType, onClick } = props;
 
-    return (
-      <WalletButtonWrapper onClick={this.handleClick}>
-        {icon && <WalletIcon src={icon} alt={name + ' logo'} />}
-        <WalletLabel>{name}</WalletLabel>
-      </WalletButtonWrapper>
-    );
-  }
+  const handleClick = () => !isDisabled && onClick(walletType);
 
-  private handleClick = () => {
-    this.props.onClick(this.props.walletType);
-  };
-}
+  const WalletButtonBody = () => (
+    <WalletButtonWrapper onClick={handleClick} margin={margin} isDisabled={isDisabled}>
+      {icon && <WalletIcon src={icon} alt={name + ' logo'} />}
+      <WalletLabel>{name}</WalletLabel>
+    </WalletButtonWrapper>
+  );
+
+  return isDisabled ? (
+    <Tooltip tooltip={translate('WALLET_DISABLED')}>
+      <WalletButtonBody />
+    </Tooltip>
+  ) : (
+    <WalletButtonBody />
+  );
+};

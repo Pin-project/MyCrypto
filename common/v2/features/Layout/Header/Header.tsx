@@ -18,25 +18,17 @@ import { ScreenLockContext } from 'v2/features/ScreenLock/ScreenLockProvider';
 const { BLUE_BRIGHT } = COLORS;
 
 const Navbar = styled.nav`
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 4;
   width: 100%;
   background: #163150;
-
-  @media (min-width: ${BREAK_POINTS.SCREEN_SM}) {
-    position: initial;
-  }
 `;
 
 const Menu = styled.div`
   position: fixed;
-  top: 77px;
   left: 0;
   overflow: auto;
   width: 375px;
-  height: calc(100vh - 77px);
+  height: 100%;
+  z-index: 9999;
   background: #163150;
 `;
 
@@ -166,6 +158,7 @@ const MenuLinks = styled.ul`
   padding: 15px 0;
   border-bottom: 1px solid #3e546d;
 
+  /* stylelint-disable-next-line no-descending-specificity */
   li {
     height: 100%;
     margin: 0;
@@ -235,8 +228,7 @@ interface IconWrapperProps {
   subItems?: boolean;
 }
 
-// prettier-ignore
-const IconWrapper = styled(Icon) <IconWrapperProps>`
+const IconWrapper = styled(Icon)<IconWrapperProps>`
   margin: 0;
   margin-left: 6px;
   font-size: 0.75rem;

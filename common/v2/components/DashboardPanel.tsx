@@ -33,6 +33,7 @@ const DPanel = styled(Panel)`
   flex-direction: column;
   flex: 1;
   margin: 0 0 ${SPACING.BASE} 0;
+  min-height: 0;
   padding: 0;
 `;
 
@@ -60,7 +61,7 @@ const DHeading = styled(Heading)`
 `;
 
 interface Props {
-  heading: any;
+  heading?: any;
   children: any;
   headingRight?: string | JSX.Element;
   footer?: JSX.Element;
@@ -74,25 +75,26 @@ export const DashboardPanel = ({
   headingRight,
   actionLink,
   footer,
-  className = '',
   children,
   padChildren,
   ...rest
 }: Props) => {
   return (
     <DPanel {...rest}>
-      <DHeadingWrapper>
-        <DHeading>{heading}</DHeading>
-        {headingRight &&
-          (actionLink ? (
-            <SRouterLink to={actionLink}>
-              <img src={settingsIcon} alt={'settings'} width={32} />
-              <Typography>{headingRight}</Typography>
-            </SRouterLink>
-          ) : (
-            headingRight
-          ))}
-      </DHeadingWrapper>
+      {heading && (
+        <DHeadingWrapper>
+          <DHeading>{heading}</DHeading>
+          {headingRight &&
+            (actionLink ? (
+              <SRouterLink to={actionLink}>
+                <img src={settingsIcon} alt={'settings'} width={32} />
+                <Typography>{headingRight}</Typography>
+              </SRouterLink>
+            ) : (
+              headingRight
+            ))}
+        </DHeadingWrapper>
+      )}
       {padChildren ? <Content>{children}</Content> : children}
       {footer && <DFooterWrapper>{footer}</DFooterWrapper>}
     </DPanel>

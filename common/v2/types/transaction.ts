@@ -1,3 +1,4 @@
+import { Brand } from 'utility-types';
 import BN from 'bn.js';
 
 import { Wei, Address } from 'v2/services/EthService';
@@ -21,7 +22,7 @@ export interface IHexStrTransaction {
   to: string;
   value: string;
   data: string;
-  gasLimit: string;
+  gasLimit: any; // number? string?
   gasPrice: string;
   nonce: string;
   chainId: number;
@@ -37,6 +38,10 @@ export interface IHexStrWeb3Transaction {
   nonce: string;
   chainId: number;
 }
+
+export type ITxHash = Brand<string, 'TxHash'>;
+
+export type ITxSigned = Brand<Uint8Array, 'TxSigned'>;
 
 export interface ITxReceipt {
   [index: string]: any;

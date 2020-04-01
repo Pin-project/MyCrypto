@@ -20,23 +20,16 @@ import {
 import { FieldLabel, BooleanOutputField, BooleanSelector } from './fields';
 import WriteForm from './WriteForm';
 
-const { GREY_LIGHTER } = COLORS;
+const { GREY_LIGHTER, WHITE } = COLORS;
 
 interface FieldWraperProps {
   isOutput?: boolean;
 }
 
-// TODO: Fix the dropdown component instead of overriding styles
 const DropdownWrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 15px;
-
-  .is-open > .Select-control > .Select-multi-value-wrapper > .Select-input:only-child {
-    transform: translateY(0%);
-    padding: 12px 15px;
-    position: inherit;
-  }
 `;
 
 const FieldWrapper = styled.div<FieldWraperProps>`
@@ -302,7 +295,7 @@ export default function GeneratedInteractionForm({
             {error && <InlineMessage>{error}</InlineMessage>}
             <ActionWrapper>
               {isRead && inputs.length > 0 && (
-                <ActionButton onClick={() => submitFormRead(currentFunction)}>
+                <ActionButton color={WHITE} onClick={() => submitFormRead(currentFunction)}>
                   {translateRaw('ACTION_16')}
                 </ActionButton>
               )}

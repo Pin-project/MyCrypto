@@ -4,8 +4,8 @@ import BigNumber from 'bignumber.js';
 import * as R from 'ramda';
 
 import {
-  Account,
-  ExtendedAccount,
+  IRawAccount,
+  IAccount,
   ITxReceipt,
   StoreAccount,
   Asset,
@@ -19,14 +19,15 @@ import { getAccountByAddressAndNetworkName } from './helpers';
 import { getAllTokensBalancesOfAccount } from '../BalanceService';
 
 export interface IAccountContext {
-  accounts: ExtendedAccount[];
-  createAccountWithID(accountData: Account, uuid: TUuid): void;
-  deleteAccount(account: ExtendedAccount): void;
-  updateAccount(uuid: TUuid, accountData: ExtendedAccount): void;
-  addNewTransactionToAccount(account: ExtendedAccount, transaction: ITxReceipt): void;
-  getAccountByAddressAndNetworkName(address: string, network: string): ExtendedAccount | undefined;
+  accounts: IAccount[];
+  createAccountWithID(accountData: IRawAccount, uuid: TUuid): void;
+  deleteAccount(account: IAccount): void;
+  updateAccount(uuid: TUuid, accountData: IAccount): void;
+  addNewTransactionToAccount(account: IAccount, transaction: ITxReceipt): void;
+  getAccountByAddressAndNetworkName(address: string, network: string): IAccount | undefined;
   updateAccountAssets(account: StoreAccount, assets: Asset[]): Promise<void>;
-  updateAccountsBalances(toUpate: ExtendedAccount[]): void;
+  updateAccountsBalances(toUpate: IAccount[]): void;
+  toggleAccountPrivacy(uuid: TUuid): void;
 }
 
 export const AccountContext = createContext({} as IAccountContext);
@@ -90,6 +91,14 @@ export const AccountProvider: React.FC = ({ children }) => {
         Boolean
       );
       model.updateAll(newAccounts);
+    },
+    toggleAccountPrivacy: uuid => {
+      const existingAccount = accounts.find(x => x.uuid === uuid);
+      if (!existingAccount) return;
+      state.updateAccount(uuid, {
+        ...existingAccount,
+        isPrivate: existingAccount.isPrivate ? !existingAccount.isPrivate : true
+      });
     }
   };
   return <AccountContext.Provider value={state}>{children}</AccountContext.Provider>;

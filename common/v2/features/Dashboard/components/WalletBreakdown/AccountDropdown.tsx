@@ -7,12 +7,13 @@ import { Checkbox } from 'v2/components';
 import { useOnClickOutside, truncate } from 'v2/utils';
 import { getLabelByAccount, AddressBookContext } from 'v2/services/Store';
 import { COLORS } from 'v2/theme';
-import { ExtendedAccount, ExtendedAddressBook, TUuid } from 'v2/types';
+import { IAccount, ExtendedAddressBook, TUuid } from 'v2/types';
 
 const { BLUE_BRIGHT } = COLORS;
 
 interface AccountDropdownProps {
-  accounts: ExtendedAccount[];
+  className?: string;
+  accounts: IAccount[];
   selected: TUuid[];
   onSubmit(selected: TUuid[]): void;
 }
@@ -81,12 +82,12 @@ const IconWrapper = styled(Icon)`
 `;
 
 const renderAccounts = (
-  accounts: ExtendedAccount[],
+  accounts: IAccount[],
   selected: string[],
   addressBook: ExtendedAddressBook[],
   handleChange: (uuid: string) => void
 ) =>
-  accounts.map((account: ExtendedAccount) => {
+  accounts.map((account: IAccount) => {
     const addressCard = getLabelByAccount(account, addressBook);
     const addressLabel = addressCard ? addressCard.label : 'Unknown Account';
     return (
@@ -103,7 +104,12 @@ const renderAccounts = (
     );
   });
 
-const AccountDropdown = ({ accounts = [], selected = [], onSubmit }: AccountDropdownProps) => {
+const AccountDropdown = ({
+  accounts = [],
+  selected = [],
+  onSubmit,
+  ...props
+}: AccountDropdownProps) => {
   const { addressBook } = useContext(AddressBookContext);
   const ref = useRef<HTMLElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -143,7 +149,7 @@ const AccountDropdown = ({ accounts = [], selected = [], onSubmit }: AccountDrop
   };
 
   return (
-    <SDropdown ref={ref as SCref} role="button" onClick={toggleOpen} isOpen={isOpen}>
+    <SDropdown ref={ref as SCref} role="button" onClick={toggleOpen} isOpen={isOpen} {...props}>
       <LabelRow>
         <span>{label}</span>
         <IconWrapper icon="navDownCaret" />

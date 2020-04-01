@@ -2,10 +2,19 @@ import React, { useContext } from 'react';
 import { Heading } from '@mycrypto/ui';
 import styled from 'styled-components';
 
-import { AccountContext, StoreContext } from 'v2/services/Store';
 import { AccountList, BannerAd, Desktop, Mobile } from 'v2/components';
-import { ActionTile, TokenPanel, WalletBreakdown, RecentTransactionList } from './components';
+import { IS_ACTIVE_FEATURE } from 'v2/config';
+import { AccountContext, StoreContext } from 'v2/services/Store';
+
 import { NotificationsPanel } from '../NotificationsPanel';
+import { DashboardZapCTA } from '../DeFiZap';
+import {
+  ActionTile,
+  TokenPanel,
+  WalletBreakdown,
+  RecentTransactionList,
+  MembershipPanel
+} from './components';
 import { actions } from './constants';
 import './Dashboard.scss';
 
@@ -14,11 +23,15 @@ const EmptyTile = styled.div`
   width: 30%;
 `;
 
+const DashboardWrapper = styled.div`
+  width: 100%;
+`;
+
 export default function Dashboard() {
-  const { isUnlockVIP, currentAccounts } = useContext(StoreContext);
+  const { isMyCryptoMember, currentAccounts } = useContext(StoreContext);
   const { accounts } = useContext(AccountContext);
   return (
-    <div>
+    <DashboardWrapper>
       {/* Mobile only */}
       <Mobile className="Dashboard-mobile">
         <NotificationsPanel accounts={accounts} />
@@ -35,6 +48,11 @@ export default function Dashboard() {
           <div className="Dashboard-mobile-walletBreakdown">
             <WalletBreakdown />
           </div>
+          {IS_ACTIVE_FEATURE.MYC_MEMBERSHIP && (
+            <div className="Dashboard-mobile-section Dashboard-mobile-tokenList">
+              <MembershipPanel />
+            </div>
+          )}
           <div className="Dashboard-mobile-section Dashboard-mobile-tokenList">
             <TokenPanel />
           </div>
@@ -47,7 +65,12 @@ export default function Dashboard() {
             dashboard={true}
           />
         </div>
-        {!isUnlockVIP && <BannerAd />}
+        {IS_ACTIVE_FEATURE.DEFIZAP && (
+          <div className="Dashboard-mobile-section">
+            <DashboardZapCTA className="Dashboard-mobile-modifiedPanel" />
+          </div>
+        )}
+        {!isMyCryptoMember && <BannerAd />}
         <div className="Dashboard-mobile-section">
           <RecentTransactionList accountsList={currentAccounts} />
         </div>
@@ -65,6 +88,11 @@ export default function Dashboard() {
                 <ActionTile key={action.title} {...action} />
               ))}
             </div>
+            {IS_ACTIVE_FEATURE.MYC_MEMBERSHIP && (
+              <div className="Dashboard-desktop-top-left-token">
+                <MembershipPanel />
+              </div>
+            )}
             <div className="Dashboard-desktop-top-left-tokens">
               <TokenPanel />
             </div>
@@ -73,6 +101,11 @@ export default function Dashboard() {
             <div>
               <WalletBreakdown />
             </div>
+            {IS_ACTIVE_FEATURE.DEFIZAP && (
+              <div>
+                <DashboardZapCTA className="Dashboard-desktop-modifiedPanel" />
+              </div>
+            )}
             <div>
               <AccountList
                 accounts={currentAccounts}
@@ -83,7 +116,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        {!isUnlockVIP && <BannerAd />}
+        {!isMyCryptoMember && <BannerAd />}
         <div className="Dashboard-desktop-bottom">
           <RecentTransactionList
             accountsList={currentAccounts}
@@ -91,6 +124,6 @@ export default function Dashboard() {
           />
         </div>
       </Desktop>
-    </div>
+    </DashboardWrapper>
   );
 }

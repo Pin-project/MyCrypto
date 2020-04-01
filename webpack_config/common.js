@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const StyleLintPlugin = require('stylelint-webpack-plugin')
 const config = require('./config');
 
 const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production';
@@ -34,7 +35,8 @@ module.exports = {
       config.path.root
     ],
     alias: {
-      modernizr$: path.resolve(__dirname, '../.modernizrrc.js')
+      modernizr$: path.resolve(__dirname, '../.modernizrrc.js'),
+      '@fixtures': `${config.path.root}/jest_config/__fixtures__`
     }
   },
 
@@ -57,7 +59,8 @@ module.exports = {
         include: [
           config.path.src,
           config.path.shared,
-          config.path.electron
+          config.path.electron,
+          config.path.testConfig
         ],
         exclude: /node_modules/,
       },
@@ -153,6 +156,12 @@ module.exports = {
 
   plugins: [
     new CleanWebpackPlugin(),
+
+    new StyleLintPlugin({
+      files: '**/*.tsx',
+      lintDirtyModulesOnly: true,
+      quiet: true
+    }),
 
     new HtmlWebpackPlugin({
       template: path.resolve(config.path.src, 'index.html'),

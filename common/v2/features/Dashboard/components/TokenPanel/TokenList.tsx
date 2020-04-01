@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import { convertToFiatFromAsset } from 'v2/utils';
 import { AssetWithDetails, TSymbol } from 'v2/types';
-import { AssetIcon, DashboardPanel, Spinner } from 'v2/components';
+import { AssetIcon, DashboardPanel, Spinner, Tooltip } from 'v2/components';
 import { translateRaw } from 'v2/translations';
 
 import { FONT_SIZE, SPACING } from 'v2/theme';
@@ -12,7 +12,7 @@ import { FONT_SIZE, SPACING } from 'v2/theme';
 import moreIcon from 'common/assets/images/icn-more.svg';
 
 const TokenListWrapper = styled.div`
-  max-height: 313px;
+  min-height: 0;
   overflow-y: auto;
   padding: 0 ${SPACING.BASE} ${SPACING.BASE} ${SPACING.BASE};
 `;
@@ -69,6 +69,7 @@ const SpinnerWrapper = styled.div`
 interface TokenListProps {
   isScanning: boolean;
   tokens: AssetWithDetails[];
+  showValue?: boolean;
   setShowDetailsView(show: boolean): void;
   setShowAddToken(setShowAddToken: boolean): void;
   setCurrentToken(token: AssetWithDetails): void;
@@ -80,13 +81,18 @@ export function TokenList(props: TokenListProps) {
     setShowDetailsView,
     setCurrentToken,
     tokens,
+    showValue = false,
     isScanning,
     setShowAddToken,
     handleScanTokens
   } = props;
   return (
     <DashboardPanel
-      heading={translateRaw('TOKENS')}
+      heading={
+        <>
+          {translateRaw('TOKENS')} <Tooltip tooltip={translateRaw('DASHBOARD_TOKENS_TOOLTIP')} />
+        </>
+      }
       headingRight={
         <div style={{ minWidth: '170px', textAlign: 'right' }}>
           <StyledButton onClick={() => handleScanTokens()}>
@@ -112,7 +118,9 @@ export function TokenList(props: TokenListProps) {
                 <AssetName>{token.name}</AssetName>
               </Asset>
               <TokenValueWrapper>
-                <TokenValue>${convertToFiatFromAsset(token, token.rate).toFixed(2)}</TokenValue>
+                {showValue && (
+                  <TokenValue>${convertToFiatFromAsset(token, token.rate).toFixed(2)}</TokenValue>
+                )}
                 <MoreIcon
                   src={moreIcon}
                   alt="More"
